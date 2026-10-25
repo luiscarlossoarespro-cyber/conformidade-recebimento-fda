@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel de Conformidade no Recebimento</title>
+<meta name="description" content="Dashboard com 29.485 recolhimentos reais de alimentos da FDA (openFDA): problemas, gravidade, tempo, lote e validade, e calculadora de vida útil para o conferente.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--line:#e4e8ee;--line2:#eef1f5;--tx:#0f172a;--tx2:#475569;--tx3:#8b98ab;--navy:#0b1f3a;--navy2:#13294b;--blue:#2a78d6;--blue-l:#e8f1fc;--or:#eb6834;--or-l:#fdeee6;--green:#1a9e6e;--green-l:#e6f6ef;--gray:#cbd5e1}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--navy)}
+body{background:var(--bg);font:14px/1.45 "Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tx);-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+header{background:var(--navy);color:#fff;position:sticky;top:env(safe-area-inset-top,0px);z-index:20;box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.hd{max-width:1680px;margin:0 auto;padding:14px 28px 0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.logo{width:38px;height:38px;flex:none;border-radius:10px;background:linear-gradient(135deg,#6fa8ff,#b69cff);display:grid;place-items:center;font-weight:800;color:var(--navy)}
+.brand h1{font-size:19px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.brand p{font-size:12.5px;color:#a9b8cf}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.f{display:flex;flex-direction:column;gap:2px}
+.f label{font-size:10px;color:#8fa3c0;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.f select{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:9px;padding:7px 10px;color:#e6edf7;min-width:118px;cursor:pointer}
+.f select option{color:#0f172a}
+.btn-clear{background:none;border:1px solid rgba(255,255,255,.25);color:#cfe0f5;border-radius:9px;padding:7px 12px;cursor:pointer;font-size:12.5px}
+.btn-clear:hover{background:rgba(255,255,255,.08)}
+.tabs{display:flex;gap:2px;margin-top:12px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:0;border-bottom:3px solid transparent;color:#a9b8cf;padding:10px 14px;font-weight:600;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:#fff}
+.tab[aria-selected=true]{color:#fff;border-color:#6fa8ff}
+.chip-f{display:none;margin:0 auto;max-width:1680px;padding:8px 28px;font-size:12.5px;color:var(--tx2)}
+.chip-f.on{display:block}
+.chip-f b{color:var(--tx)}
+main{max-width:1680px;margin:0 auto;padding:18px 28px 30px}
+.page{display:none;gap:16px}
+.page.on{display:grid}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.kpis.k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0}
+.k small{font-size:11.5px;color:var(--tx2);font-weight:600;display:block}
+.k b{display:block;font-size:28px;font-weight:800;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums;line-height:1.1}
+.k span{display:block;font-size:11.5px;color:var(--tx3);margin-top:4px}
+.k.or{border-top:3px solid var(--or)} .k.gr{border-top:3px solid var(--green)} .k.bl{border-top:3px solid var(--blue)}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g64{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}.g46{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;min-width:0}
+.card h3{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.card .s{font-size:12px;color:var(--tx3);margin:2px 0 10px}
+.tag{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 7px;border-radius:99px;background:var(--line2);color:var(--tx3)}
+.tag.live{background:var(--blue-l);color:var(--blue)}
+.ins{margin-top:10px;font-size:12.5px;color:var(--tx2);background:#f8fafc;border-left:3px solid var(--blue);padding:8px 10px;border-radius:6px}
+.ins.o{border-color:var(--or)}.ins.g{border-color:var(--green)}
+.ins b{color:var(--tx)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:inherit}
+.tbl-wrap{overflow:auto;max-height:520px;border:1px solid var(--line2);border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{position:sticky;top:0;background:#f8fafc;text-align:left;font-size:10.5px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;padding:8px 9px;border-bottom:1px solid var(--line);white-space:nowrap;cursor:default}
+th.sort{cursor:pointer}th.sort:hover{color:var(--tx)}
+td{padding:7px 9px;border-bottom:1px solid var(--line2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.n{text-align:right}
+tr:hover td{background:#fafbfd}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11.5px;font-weight:700}
+.pill.o{background:var(--or-l);color:#b8461a}.pill.g{background:var(--green-l);color:#137a55}.pill.b{background:var(--blue-l);color:#1d5fae}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{background:#fff;border:0;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--tx2);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--navy);color:#fff}
+.search{border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12.5px;min-width:180px}
+.qa{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.q{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.q h4{font-size:14.5px;display:flex;gap:10px;align-items:flex-start}
+.q h4 i{font-style:normal;flex:none;width:26px;height:26px;border-radius:8px;background:var(--blue-l);color:var(--blue);display:grid;place-items:center;font-size:12.5px;font-weight:800}
+.q p{color:var(--tx2);font-size:13.5px;padding-left:36px}
+.q button{align-self:flex-start;margin-left:36px;background:none;border:0;color:var(--blue);font-weight:700;font-size:12.5px;cursor:pointer;padding:0}
+.rec{display:grid;gap:8px}
+.r{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 11px;border:1px solid var(--line);border-radius:10px}
+.r i{font-style:normal;width:26px;height:26px;border-radius:8px;background:var(--blue-l);color:var(--blue);display:grid;place-items:center;font-weight:800;font-size:12.5px}
+.r p{font-size:12.8px;line-height:1.35}
+.r em{font-style:normal;font-weight:800;color:var(--green);font-size:14.5px;white-space:nowrap;text-align:right}
+.r em small{display:block;font-size:10px;color:var(--tx3);font-weight:600}
+.leg{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--tx2);margin-bottom:6px}
+.leg span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c);vertical-align:-1px}
+.list{font-size:13px;color:var(--tx2);padding-left:18px;display:grid;gap:6px}
+.list b{color:var(--tx)}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--navy);color:#fff;font-size:12px;padding:7px 10px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.18);opacity:0;transition:opacity .1s;max-width:260px;line-height:1.4}
+#tip b{color:#9cc3f0}
+.hov{cursor:pointer}
+.hov:hover{opacity:.82}
+footer{max-width:1680px;margin:0 auto;padding:0 28px 26px;font-size:11.5px;color:var(--tx3);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:var(--tx2)}
+@media(max-width:1200px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.g3{grid-template-columns:minmax(0,1fr)}.g64,.g46{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:760px){header{position:static}.hd,main,footer,.chip-f{padding-left:16px;padding-right:16px}.kpis,.kpis.k4{grid-template-columns:repeat(2,minmax(0,1fr))}.g2,.qa{grid-template-columns:minmax(0,1fr)}.brand h1{font-size:16px;white-space:normal}.f select{min-width:0}.k b{font-size:23px}}
+
+/* ---- movimento ---- */
+#progresso{position:fixed;top:0;left:0;height:3px;width:0;z-index:30;background:linear-gradient(90deg,#6fa8ff,#b69cff)}
+.rv{opacity:.45;transform:translateY(18px) scale(.99);transition:opacity .75s cubic-bezier(.16,.84,.3,1),transform .75s cubic-bezier(.16,.84,.3,1),box-shadow .3s;transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+.card,.k,.q{transition:transform .3s cubic-bezier(.16,.84,.3,1),box-shadow .3s}
+.card.in:hover,.k.in:hover,.q.in:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(15,23,42,.08)}
+.gv{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0);transition:transform 1s cubic-bezier(.16,.84,.3,1);transition-delay:var(--gd,0s)}
+.gh{transform-box:fill-box;transform-origin:0 50%;transform:scaleX(0);transition:transform 1s cubic-bezier(.16,.84,.3,1);transition-delay:var(--gd,0s)}
+.gc{transform-box:fill-box;transform-origin:50% 50%;transform:scale(0);transition:transform .6s cubic-bezier(.34,1.56,.64,1);transition-delay:var(--gd,0s)}
+.gl{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1.8s cubic-bezier(.45,.05,.25,1)}
+.gf{opacity:0;transition:opacity 1.2s .4s}
+.draw .gv,.draw .gh,.draw .gc{transform:none}.draw .gl{stroke-dashoffset:0}.draw .gf{opacity:1}
+.page.on{animation:pg .45s cubic-bezier(.16,.84,.3,1)}
+@keyframes pg{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.rv,.gv,.gh,.gc,.gl,.gf{transition:none!important;opacity:1!important;transform:none!important;stroke-dashoffset:0!important}.page.on{animation:none}}
+</style>
+<style>
+.note{font-size:12px;color:var(--tx2);border-left:3px solid var(--or);background:#fffaf6;padding:8px 11px;border-radius:6px}
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.calc label{font-size:12px;color:var(--tx2);font-weight:600;display:block;margin-bottom:3px}
+.calc input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.vivo{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:#9fe3c6;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.vivo::before{content:"";width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:pulso 1.8s infinite}
+@keyframes pulso{70%{box-shadow:0 0 0 9px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.arc{stroke-dasharray:0 377;transition:stroke-dasharray 1.1s cubic-bezier(.16,.84,.3,1);transition-delay:var(--gd,0s)}
+.draw .arc{stroke-dasharray:var(--l) 377}
+.play{background:var(--navy);color:#fff;border:0;border-radius:9px;padding:6px 12px;font-size:12.5px;font-weight:700;cursor:pointer}
+.play.on{background:var(--or)}
+.hint{font-size:11.5px;color:var(--tx3);margin:0 0 6px}
+@media(prefers-reduced-motion:reduce){.arc{transition:none!important;stroke-dasharray:var(--l) 377!important}.vivo::before{animation:none}}
+.res{margin-top:12px;padding:14px;border-radius:12px;border:2px solid var(--line);font-weight:700}
+.res.ok{border-color:var(--green);background:var(--green-l)}.res.no{border-color:var(--or);background:var(--or-l)}.res.ven{border-color:#c62828;background:#fdecec}
+</style>
+</head>
+<body>
+<div id="progresso"></div>
+<header><div class="hd">
+ <div class="top">
+  <div class="brand"><div class="logo">C</div><div><h1>Conformidade no Recebimento</h1><p id="sub">Recolhimentos reais de alimentos da FDA (EUA) · <span class="vivo">interativo: clique nos gráficos</span></p></div></div>
+  <div class="filters">
+   <div class="f"><label>Ano de início</label><select id="fa"></select></div>
+   <div class="f"><label>Classe de risco</label><select id="fc"></select></div>
+   <div class="f"><label>Tipo de problema</label><select id="ft"></select></div>
+   <div class="f"><label>Quem iniciou</label><select id="fx"></select></div>
+   <button class="btn-clear" id="limpar">Limpar</button>
+  </div>
+ </div>
+ <nav class="tabs" role="tablist" id="tabs"></nav>
+</div></header>
+<div class="chip-f" id="chip"></div>
+<main>
+<section class="page" id="p-geral"></section>
+<section class="page" id="p-perg"></section>
+<section class="page" id="p-prob"></section>
+<section class="page" id="p-tempo"></section>
+<section class="page" id="p-lote"></section>
+<section class="page" id="p-emp"></section>
+<section class="page" id="p-barr"></section>
+<section class="page" id="p-calc"></section>
+<section class="page" id="p-qual"></section>
+</main>
+<footer><span>Fonte: openFDA Food Enforcement (U.S. FDA), domínio público (CC0). Dados dos EUA, só alimentos, fornecidos como estão. Estudo de portfólio: não serve para alerta ao público nem decisão de saúde. Análise com apoio de IA.</span><span><a href="https://luiscarlossoarespro-cyber.github.io/">← Portfólio</a> · <a href="https://docs.google.com/spreadsheets/d/1T55SG4vpSKiayqWkS1nCQxdFY2sBl40jXn0MI_TJA3o/edit">Planilha do tratamento</a></span></footer>
+<div id="tip"></div>
+<script src="dados.js"></script>
+<script>
+const D=window.DADOS,$=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString("pt-BR"),pct=(a,b,d=1)=>b?(a/b*100).toFixed(d).replace(".",",")+"%":"–",num=(n,d=1)=>n.toFixed(d).replace(".",",");
+const COR=["#eb6834","#2a78d6","#7fb2ec","#b6c0cf"];
+const F={a:"",c:"",t:"",x:""};
+const ABAS=[["geral","Visão geral"],["perg","Perguntas do gerente"],["prob","Problemas e gravidade"],["tempo","Tempo"],["lote","Lote e validade"],["emp","Empresas e estados"],["barr","O que a conferência vê"],["calc","Calculadora"],["qual","Qualidade e método"]];
+// filtros
+function opts(id,arr,todos){ $(id).innerHTML='<option value="">'+todos+'</option>'+arr.map((v,i)=>`<option value="${i}">${v}</option>`).join("") }
+opts("fa",D.anos,"Todos");opts("fc",D.classes.map(c=>c=="Não classificado"?c:"Classe "+c),"Todas");opts("ft",D.cats,"Todos");opts("fx",D.acoes,"Todos");
+["a","c","t","x"].forEach((k,i)=>$(["fa","fc","ft","fx"][i]).onchange=e=>{parar();F[k]=e.target.value;render()});
+$("limpar").onclick=window.resetPagina=()=>{parar();["fa","fc","ft","fx"].forEach(i=>$(i).value="");F.a=F.c=F.t=F.x="";render()};
+function cells(over){const f=Object.assign({},F,over||{});return D.cubo.filter(c=>(f.a===""||c.a==f.a)&&(f.c===""||c.c==f.c)&&(f.t===""||c.t==f.t)&&(f.x===""||c.x==f.x))}
+function agg(over){const r={n:0,cod:0,tl:0,val:0,nac:0,ong:0,hc:{},ht:{}};for(const c of cells(over)){["n","cod","tl","val","nac","ong"].forEach(k=>r[k]+=c[k]);for(const k in c.hc)r.hc[k]=(r.hc[k]||0)+c.hc[k];for(const k in c.ht)r.ht[k]=(r.ht[k]||0)+c.ht[k]}return r}
+function stat(h){const ks=Object.keys(h).map(Number).sort((a,b)=>a-b),tot=ks.reduce((s,k)=>s+h[k],0);if(!tot)return null;let ac=0,med=null,p90=null,sum=0;for(const k of ks){sum+=k*h[k];ac+=h[k];if(med===null&&ac>=tot*.5)med=k;if(p90===null&&ac>=tot*.9)p90=k}return{n:tot,med,p90,mean:sum/tot}}
+// tooltip
+const tip=$("tip");document.addEventListener("mousemove",e=>{const t=e.target.closest("[data-t]");if(!t){tip.style.opacity=0;return}tip.innerHTML=t.dataset.t;tip.style.opacity=1;tip.style.left=Math.min(e.clientX+14,innerWidth-270)+"px";tip.style.top=(e.clientY+14)+"px"});
+// movimento
+const LENTO=()=>window.__lento||1,RED=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
+function countUp(root){if(RED())return;root.querySelectorAll(".k b").forEach(el=>{const t=el.textContent,m=t.match(/^([\d.]+(?:,\d+)?)(.*)$/);if(!m)return;const dec=(m[1].split(",")[1]||"").length,to=parseFloat(m[1].replace(/\./g,"").replace(",",".")),suf=m[2],t0=performance.now(),dur=900*LENTO();(function f(now){const p=Math.min(1,Math.max(0,(now-t0)/dur)),e=1-Math.pow(1-p,3),v=to*e;if(p<1){el.textContent=(dec?v.toFixed(dec).replace(".",","):Math.round(v).toLocaleString("pt-BR"))+suf;requestAnimationFrame(f)}else el.textContent=t})(t0)})}
+const IO=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");IO.unobserve(e.target)}}),{threshold:.08});
+function movimento(root){root.classList.remove("draw");root.querySelectorAll(".card,.k,.q").forEach((e,i)=>{e.classList.add("rv");e.style.setProperty("--d",Math.min(i*.04,.4)*LENTO()+"s");IO.observe(e)});requestAnimationFrame(()=>requestAnimationFrame(()=>root.classList.add("draw")));countUp(root)}
+function setF(k,v){F[k]=String(v);$({a:"fa",c:"fc",t:"ft",x:"fx"}[k]).value=String(v);parar();render()}
+document.querySelector("main").addEventListener("click",e=>{const t=e.target.closest("[data-fa],[data-fc],[data-ft]");if(!t)return;if(t.dataset.fa!==undefined)setF("a",F.a===t.dataset.fa?"":t.dataset.fa);else if(t.dataset.fc!==undefined)setF("c",F.c===t.dataset.fc?"":t.dataset.fc);else if(t.dataset.ft!==undefined)setF("t",F.t===t.dataset.ft?"":t.dataset.ft)});
+let TMR=null;function parar(){if(TMR){clearInterval(TMR);TMR=null}}
+function tocar(){if(TMR){parar();render();return}const ix=D.anos.map((a,i)=>[a,i]).filter(x=>/^\d+$/.test(x[0])&&+x[0]>=2012).map(x=>x[1]);let k=0;F.a=String(ix[0]);$("fa").value=F.a;render();TMR=setInterval(()=>{k++;if(k>=ix.length){parar();F.a="";$("fa").value="";render();return}F.a=String(ix[k]);$("fa").value=F.a;render()},1700*LENTO())}
+// gráficos
+function hbar(rows,o={}){const W=640,rh=o.rh||30,L=o.L||220,R=90,H=rows.length*rh+8,mx=Math.max(...rows.map(r=>r.v),1);let s=`<svg viewBox="0 0 ${W} ${H}">`;rows.forEach((r,i)=>{const y=i*rh+4,w=(W-L-R)*r.v/mx,at=r.ft!==undefined?` data-ft="${r.ft}"`:"";s+=`<text x="${L-8}" y="${y+rh/2+4}" text-anchor="end" font-size="12" fill="#475569">${r.l}</text><rect class="hov gh" style="--gd:${(i*.07*LENTO()).toFixed(2)}s" x="${L}" y="${y+4}" width="${Math.max(w,2)}" height="${rh-10}" rx="4" fill="${r.c||"#2a78d6"}" data-t="${r.t||r.l+": <b>"+fmt(r.v)+"</b>"}"${at}/><text class="gf" x="${L+w+6}" y="${y+rh/2+4}" font-size="12" font-weight="700" fill="#0f172a">${r.s||fmt(r.v)}</text>`});return s+"</svg>"}
+function stackYear(){const as=D.anos.map((a,i)=>({a,i,v:[0,0,0,0]}));for(const c of cells({a:""}))as[c.a].v[c.c]+=c.n;const W=720,H=250,pl=40,pb=30,mx=Math.max(...as.map(x=>x.v.reduce((s,y)=>s+y,0)),1),bw=(W-pl)/as.length;let s=`<svg viewBox="0 0 ${W} ${H}">`;for(let g=0;g<=4;g++){const y=H-pb-(H-pb-10)*g/4;s+=`<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}" stroke="#e4e8ee"/><text x="${pl-6}" y="${y+4}" text-anchor="end" font-size="10" fill="#8b98ab">${fmt(mx*g/4)}</text>`}as.forEach((x,k)=>{let y=H-pb;const tot=x.v.reduce((s,t)=>s+t,0),sel=F.a===""||F.a==x.i;[0,1,2,3].forEach(ci=>{const h=(H-pb-10)*x.v[ci]/mx;y-=h;if(h>0)s+=`<rect class="hov gv" data-fa="${x.i}" style="--gd:${(k*.05*LENTO()).toFixed(2)}s" x="${pl+k*bw+4}" y="${y}" width="${bw-8}" height="${h}" fill="${COR[ci]}" opacity="${sel?1:.25}" data-t="<b>${x.a}</b><br>${ci<3?"Classe "+D.classes[ci]:"Não classificado"}: ${fmt(x.v[ci])}<br>Total: ${fmt(tot)}"/>`});s+=`<text x="${pl+k*bw+bw/2}" y="${H-10}" text-anchor="middle" font-size="10" fill="#475569">${x.a.length>4?"s/d":x.a.slice(2)}</text>`});return s+"</svg>"}
+function linhaMensal(){const ys=F.a!==""&&/^\d+$/.test(D.anos[F.a])?D.anos[F.a]:null,idx=D.meses.map((m,i)=>i).filter(i=>!ys||D.meses[i].startsWith(ys)),T={},C1={};for(const c of D.mensal){if((F.c!==""&&c.c!=F.c)||(F.t!==""&&c.t!=F.t)||(F.x!==""&&c.x!=F.x))continue;T[c.m]=(T[c.m]||0)+c.n;if(c.c==0)C1[c.m]=(C1[c.m]||0)+c.n}
+ const W=720,H=250,pl=44,pb=28,mx=Math.max(...idx.map(i=>T[i]||0),1),X=k=>pl+(W-pl-8)*k/Math.max(idx.length-1,1),Y=v=>H-pb-(H-pb-12)*v/mx,pts=a=>idx.map((i,k)=>X(k).toFixed(1)+","+Y(a[i]||0).toFixed(1));
+ let s=`<svg viewBox="0 0 ${W} ${H}">`;for(let g=0;g<=4;g++){const y=H-pb-(H-pb-12)*g/4;s+=`<line x1="${pl}" x2="${W}" y1="${y}" y2="${y}" stroke="#e4e8ee"/><text x="${pl-6}" y="${y+4}" text-anchor="end" font-size="10" fill="#8b98ab">${fmt(mx*g/4)}</text>`}
+ s+=`<path class="gf" d="M${pts(T).join(" L")} L${X(idx.length-1)},${H-pb} L${pl},${H-pb}Z" fill="#2a78d6" fill-opacity=".14"/><path class="gl" pathLength="1" d="M${pts(T).join(" L")}" fill="none" stroke="#2a78d6" stroke-width="2.2" stroke-linejoin="round"/><path class="gl" pathLength="1" d="M${pts(C1).join(" L")}" fill="none" stroke="#eb6834" stroke-width="2.2" stroke-linejoin="round"/>`;
+ idx.forEach((i,k)=>{const m=D.meses[i];if(m.endsWith("-01")||(ys&&k%2==0))s+=`<text x="${X(k)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#475569">${ys?m.slice(5):m.slice(0,4)}</text>`;const w=(W-pl)/idx.length;s+=`<rect x="${X(k)-w/2}" y="10" width="${w}" height="${H-pb-10}" fill="transparent" class="hov" data-t="<b>${m.slice(5)}/${m.slice(0,4)}</b><br>Total: ${fmt(T[i]||0)}<br>Classe I: ${fmt(C1[i]||0)}"/>`});return s+"</svg>"}
+function rosca(){const t=[0,0,0,0];for(const c of cells({c:""}))t[c.c]+=c.n;const tot=t.reduce((a,b)=>a+b,0),Cc=377,r=60;let ac=0,s=`<svg viewBox="0 0 200 200" style="max-width:260px;margin:auto"><g transform="rotate(-90 100 100)">`;t.forEach((v,i)=>{if(!v)return;const l=Cc*v/tot;s+=`<circle class="arc hov" data-fc="${i}" style="--l:${l.toFixed(1)};--gd:${(i*.15*LENTO()).toFixed(2)}s" cx="100" cy="100" r="${r}" fill="none" stroke="${COR[i]}" stroke-width="26" stroke-dashoffset="${-ac}" opacity="${F.c===""||F.c==i?1:.25}" data-t="<b>${i<3?"Classe "+D.classes[i]:"Não classificado"}</b><br>${fmt(v)} (${pct(v,tot)})"/>`;ac+=l});return s+`</g><text style="pointer-events:none" x="100" y="98" text-anchor="middle" font-size="20" font-weight="800" fill="#0f172a">${fmt(tot)}</text><text style="pointer-events:none" x="100" y="116" text-anchor="middle" font-size="10" fill="#8b98ab">recolhimentos</text></svg>`}
+function porTipo(over){const r=D.cats.map((c,i)=>({c,i,n:0,c1:0}));for(const c of cells(Object.assign({t:""},over||{}))){r[c.t].n+=c.n;if(c.c==0)r[c.t].c1+=c.n}return r}
+// páginas
+function kpi(l,v,s,cl){return `<div class="k ${cl||""}"><small>${l}</small><b>${v}</b><span>${s||""}</span></div>`}
+function geral(){const a=agg(),c1=cells().filter(c=>c.c==0).reduce((s,c)=>s+c.n,0),cl=stat(a.hc),tr=stat(a.ht);
+ $("p-geral").innerHTML=`<div class="kpis">${kpi("Recolhimentos",fmt(a.n),"no filtro atual","bl")}${kpi("Classe I (risco sério)",pct(c1,a.n),fmt(c1)+" recolhimentos","or")}${kpi("Até a FDA classificar",cl?cl.med+" dias":"–","mediana · P90 "+(cl?cl.p90:"–")+" dias")}${kpi("Citam código ou lote",pct(a.cod,a.n),"o lote dá para identificar","gr")}${kpi("Citam validade",pct(a.val,a.n),"no código do produto")}${kpi("Todos os lotes",pct(a.tl,a.n),"recolhimento sem lote específico")}</div>
+ <div class="grid g64"><div class="card"><h3>Recolhimentos por ano e classe de risco <span class="tag live">clique para filtrar</span> <button class="play ${TMR?"on":""}" onclick="tocar()">${TMR?"■ Parar":"▶ Reproduzir anos"}</button></h3><div class="s">Clique numa barra para filtrar o painel inteiro; clique de novo para limpar. 2026 está incompleto (dados até 14/10/2026).</div><div class="leg"><span style="--c:${COR[0]}">Classe I</span><span style="--c:${COR[1]}">Classe II</span><span style="--c:${COR[2]}">Classe III</span><span style="--c:${COR[3]}">Não classificado</span></div>${stackYear()}</div>
+ <div class="card"><h3>Problemas que mais geram recolhimento</h3><div class="s">À direita: recolhimentos · % que é Classe I.</div>${hbar(porTipo().sort((x,y)=>y.n-x.n).map(t=>({ft:t.i,l:t.c,v:t.n,c:F.t===""||F.t==t.i?"#2a78d6":"#c7d3e3",s:fmt(t.n)+" · "+pct(t.c1,t.n,0),t:`<b>${t.c}</b><br>${fmt(t.n)} recolhimentos<br>Classe I: ${fmt(t.c1)} (${pct(t.c1,t.n)})`})),{L:180})}</div></div>
+ <div class="grid g64"><div class="card"><h3>Recolhimentos por mês <span class="tag live">passe o mouse</span></h3><div class="s">Azul: todos os recolhimentos do filtro. Laranja: Classe I. Escolha um ano para ampliar os meses.</div>${linhaMensal()}</div><div class="card"><h3>Classes de risco <span class="tag live">clique para filtrar</span></h3><div class="s">Fatia do filtro atual (sem contar a classe escolhida).</div>${rosca()}</div></div>
+ <div class="note">Classe I = risco de dano sério à saúde; II = dano temporário ou reversível; III = improvável causar dano. Cada recolhimento é um número oficial da FDA (um produto/lote), não um evento: um evento pode ter vários.</div>`}
+function perg(){const a=agg(),g=agg({}),c1=cells().filter(c=>c.c==0).reduce((s,c)=>s+c.n,0),cl=stat(a.hc),tr=stat(a.ht),t=porTipo(),top=[...t].sort((x,y)=>y.n-x.n)[0],grav=[...t].filter(x=>x.n>200).sort((x,y)=>y.c1/y.n-x.c1/x.n)[0],ob=cells().filter(c=>D.acoes[c.x].startsWith("Obrig")).reduce((s,c)=>s+c.n,0);
+ const Q=[["Qual problema mais gera recolhimento?",top?`<b>${top.c}</b>: ${fmt(top.n)} recolhimentos (${pct(top.n,a.n)} do filtro).`:"–","prob"],
+ ["Qual é o mais perigoso?",grav?`<b>${grav.c}</b>: ${pct(grav.c1,grav.n)} dos casos são Classe I (só tipos com mais de 200 casos).`:"–","prob"],
+ ["Quantos são de risco sério (Classe I)?",`<b>${fmt(c1)}</b> de ${fmt(a.n)}: ${pct(c1,a.n)}.`,"geral"],
+ ["Quanto tempo a FDA leva para classificar o risco?",cl?`Mediana <b>${cl.med} dias</b>; 9 em cada 10 ficam abaixo de <b>${cl.p90} dias</b> (média ${num(cl.mean)}).`:"–","tempo"],
+ ["Quanto tempo leva para encerrar o recolhimento?",tr?`Mediana <b>${fmt(tr.med)} dias</b> (P90 ${fmt(tr.p90)}), só onde há data de término .`:"–","tempo"],
+ ["Dá para identificar o lote?",`Em <b>${pct(a.cod,a.n)}</b> dos casos o texto traz código ou lote específico.`,"lote"],
+ ["Quantos recolhem todos os lotes?",`<b>${pct(a.tl,a.n)}</b> (${fmt(a.tl)}): não há lote específico para conferir.`,"lote"],
+ ["A validade ajuda a identificar?",`Em <b>${pct(a.val,a.n)}</b> o código cita validade (best by, use by, exp...).`,"lote"],
+ ["Quantos foram por ordem da FDA?",`<b>${pct(ob,a.n)}</b> (${fmt(ob)}); o resto a própria empresa decidiu.`,"geral"],
+ ["Quais empresas reincidem?",`Das 15 com mais recolhimentos, <b>${D.empresas.filter(e=>e.anos>=3).length}</b> aparecem em 3 ou mais anos diferentes (período completo).`,"emp"]];
+ $("p-perg").innerHTML=`<div class="qa">${Q.map((q,i)=>`<div class="q"><h4><i>${i+1}</i>${q[0]}</h4><p>${q[1]}</p><button onclick="abrirAba('${q[2]}')">ver detalhe →</button></div>`).join("")}</div><div class="note">As respostas recalculam com os filtros (exceto a de empresas, que usa o período completo).</div>`}
+function prob(){const t=porTipo().sort((x,y)=>y.n-x.n),tot=t.reduce((s,x)=>s+x.n,0);let ac=0;const rows=t.map(x=>{ac+=x.n;return `<tr><td>${x.c}</td><td class="n">${fmt(x.n)}</td><td class="n">${pct(x.n,tot)}</td><td class="n">${pct(ac,tot)}</td><td><span class="pill ${ac/tot<=.8?"o":ac/tot<=.95?"b":"g"}">${ac/tot<=.8||ac-x.n<tot*.8?"A":ac-x.n<tot*.95?"B":"C"}</span></td><td class="n">${fmt(x.c1)}</td><td class="n">${pct(x.c1,x.n)}</td></tr>`}).join("");
+ const ac2={};for(const c of cells())ac2[c.x]=(ac2[c.x]||0)+c.n;
+ $("p-prob").innerHTML=`<div class="grid g2"><div class="card"><h3>Curva ABC dos tipos de problema</h3><div class="s">A = até 80% acumulado; B = até 95%; C = o resto (convenção de Pareto).</div><div class="tbl-wrap"><table><thead><tr><th>Tipo</th><th class="n">Recolhim.</th><th class="n">%</th><th class="n">% acum.</th><th>ABC</th><th class="n">Classe I</th><th class="n">% Cl. I</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+ <div class="card"><h3>Gravidade por tipo (% Classe I)</h3><div class="s">Quanto maior a barra, mais casos graves entre os recolhimentos do tipo.</div>${hbar(t.filter(x=>x.n>0).sort((x,y)=>y.c1/y.n-x.c1/x.n).map(x=>({ft:x.i,l:x.c,v:x.c1/x.n*100,c:"#eb6834",s:pct(x.c1,x.n),t:`<b>${x.c}</b><br>${pct(x.c1,x.n)} Classe I (${fmt(x.c1)} de ${fmt(x.n)})`})),{L:200})}</div></div>
+ <div class="card"><h3>Quem iniciou o recolhimento</h3>${hbar(D.acoes.map((a,i)=>({l:a,v:ac2[i]||0,c:"#2a78d6"})),{L:200,rh:30})}</div>`}
+function tempo(){const a=agg(),cl=stat(a.hc),tr=stat(a.ht);
+ function hist(h,w,max,lab){const ks=[];for(let k=0;k<=max;k+=w)ks.push(k);const vs=ks.map(k=>h[k]||0),mx=Math.max(...vs,1),W=640,H=190,bw=(W-40)/ks.length;let s=`<svg viewBox="0 0 ${W} ${H}">`;ks.forEach((k,i)=>{const hh=(H-34)*vs[i]/mx;s+=`<rect class="hov gv" style="--gd:${(i*.012*LENTO()).toFixed(2)}s" x="${40+i*bw+1}" y="${H-24-hh}" width="${Math.max(bw-2,1)}" height="${hh}" fill="#2a78d6" data-t="${lab(k)}: <b>${fmt(vs[i])}</b>"/>`;if(i%Math.ceil(ks.length/10)==0)s+=`<text x="${40+i*bw}" y="${H-8}" font-size="10" fill="#8b98ab">${k}</text>`});return s+"</svg>"}
+ const hc={};for(const k in a.hc)hc[Math.floor(k/5)*5]=(hc[Math.floor(k/5)*5]||0)+a.hc[k];const ht={};for(const k in a.ht)ht[Math.floor(k/200)*200]=(ht[Math.floor(k/200)*200]||0)+a.ht[k];
+ $("p-tempo").innerHTML=`<div class="kpis k4">${kpi("Mediana até classificar",cl?cl.med+" dias":"–","metade dos casos fica abaixo","bl")}${kpi("P90 até classificar",cl?cl.p90+" dias":"–","9 em cada 10 ficam abaixo","or")}${kpi("Mediana até encerrar",tr?fmt(tr.med)+" dias":"–","só onde há data de término")}${kpi("Ainda em andamento",fmt(a.ong),"status Ongoing (a FDA não atualiza depois de classificar)")}</div>
+ <div class="grid g2"><div class="card"><h3>Dias do início até a classificação</h3><div class="s">Faixas de 5 dias, até 400 (o último grupo junta os acima).</div>${hist(hc,5,400,k=>k+" a "+(k+4)+" dias")}</div><div class="card"><h3>Dias do início até o encerramento</h3><div class="s">Faixas de 200 dias, até 3.000 (o último grupo junta os acima).</div>${hist(ht,200,3000,k=>k+" a "+(k+199)+" dias")}</div></div>
+ <div class="note">Mediana e P90 são lidas das faixas de dias (contadas dia a dia, sem aproximação). Média geral da classificação: 68,5 dias. Dias vazios (sem data de classificação ou término) ficam de fora.</div>`}
+function lote(){const a=agg(),v=D.validade,g=(b,i)=>v.filter(x=>x.bloco==b&&x.item==i)[0],faixas=v.filter(x=>x.bloco=="faixa"),tipos=v.filter(x=>x.bloco=="tipo"),tot=+g("resumo","recolhimentos_com_validade_clara").valor_1;
+ const nome={"ja_vencido":"Já vencido","0_a_30_dias":"0 a 30 dias","31_a_90_dias":"31 a 90 dias","91_a_180_dias":"91 a 180 dias","mais_de_180_dias":"Mais de 180 dias"};
+ $("p-lote").innerHTML=`<div class="kpis k4">${kpi("Citam código ou lote",pct(a.cod,a.n),fmt(a.cod)+" de "+fmt(a.n),"gr")}${kpi("Todos os lotes",pct(a.tl,a.n),fmt(a.tl)+" casos")}${kpi("Citam validade",pct(a.val,a.n),fmt(a.val)+" casos","bl")}${kpi("Abrangência nacional",pct(a.nac,a.n),"EUA inteiro ou EUA + exterior")}</div>
+ <div class="card"><h3>Validade restante quando o recolhimento começou <span class="tag">período completo</span></h3><div class="s">${fmt(tot)} recolhimentos cujo texto cita uma única data de validade clara (${pct(tot,29485)} do total). Não responde aos filtros. Fonte: aba Lotes FDA da planilha (regras rígidas, amostra de 70 conferida).</div>${hbar(faixas.map(x=>({l:nome[x.item],v:+x.valor_1,c:x.item=="ja_vencido"?"#eb6834":"#2a78d6",s:fmt(+x.valor_1)+" · "+pct(+x.valor_1,tot)})),{L:150})}<div class="ins o"><b>${fmt(+g("resumo","ja_vencidos_no_inicio").valor_1)}</b> já estavam vencidos quando o recolhimento começou. Mediana de validade restante: <b>${g("resumo","mediana_dias_restantes").valor_1} dias</b>.</div></div>
+ <div class="card"><h3>Vencidos por tipo de problema <span class="tag">período completo</span></h3><div class="tbl-wrap"><table><thead><tr><th>Tipo</th><th class="n">Com validade clara</th><th class="n">Já vencidos</th><th class="n">% vencidos</th><th class="n">Mediana de dias restantes</th></tr></thead><tbody>${tipos.map(x=>`<tr><td>${x.item}</td><td class="n">${fmt(+x.valor_1)}</td><td class="n">${fmt(+x.valor_2)}</td><td class="n">${pct(+x.valor_2,+x.valor_1)}</td><td class="n">${x.valor_3}</td></tr>`).join("")}</tbody></table></div></div>
+ <div class="note">Atenção: "citam código" é uma regra por palavras e dígitos no texto da FDA. Não prova que o produto estava dentro da validade.</div>`}
+function emp(){const E=D.empresas,S=D.estados;
+ $("p-emp").innerHTML=`<div class="grid g2"><div class="card"><h3>Empresas com mais recolhimentos <span class="tag">período completo</span></h3><div class="s">● = reincidente (recolhimentos em 3 ou mais anos diferentes). Aparecer aqui mostra volume de produtos, não que a empresa seja pior.</div>${hbar(E.map(e=>({l:e.empresa_padrao.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase())+(e.anos>=3?" ●":""),v:e.n,c:e.anos>=3?"#eb6834":"#2a78d6",s:fmt(e.n)+" · "+e.anos+" ano"+(e.anos>1?"s":""),t:`<b>${e.empresa_padrao}</b><br>${fmt(e.n)} recolhimentos<br>Classe I: ${fmt(e.c1)}<br>${e.anos} ano(s) diferente(s)`})),{L:230,rh:28})}</div>
+ <div class="card"><h3>Estados dos EUA com mais recolhimentos <span class="tag">período completo</span></h3><div class="s">Estado da empresa (a FDA não publica região do Brasil). Número à direita: total · % Classe I.</div>${hbar(S.map(e=>({l:e.estado,v:e.n,s:fmt(e.n)+" · "+pct(e.c1,e.n,0),c:"#2a78d6"})),{L:60})}</div></div>`}
+function barr(){const t=porTipo(),m={"Rotulagem / embalagem":["Sim","Rótulo, lote e validade são conferíveis"],"Alergênico não declarado":["Parcial","Só se o rótulo estiver visivelmente errado"],"Corpo estranho":["Parcial","Só se estiver visível"],"Processo / higiene / deterioração":["Parcial","Só se houver sinal visível"],"Contaminação microbiológica":["Não","Não se vê a olho (o lote ajuda a rastrear)"],"Químico / substância indevida":["Não","Não se vê a olho"],"Outros":["Não classificado","Sem regra"]};
+ const tot=t.reduce((s,x)=>s+x.n,0),g={Sim:0,Parcial:0,Não:0,"Não classificado":0};t.forEach(x=>g[m[x.c][0]]+=x.n);
+ $("p-barr").innerHTML=`<div class="note"><b>Interpretação do autor, não é dado da FDA.</b> A coluna "A conferência vê?" foi decidida pelo tipo de problema. Os volumes e % Classe I são da FDA e respondem aos filtros.</div>
+ <div class="kpis k4">${kpi("A conferência vê (Sim)",pct(g.Sim,tot),fmt(g.Sim)+" recolhimentos","gr")}${kpi("Pode ver (Parcial)",pct(g.Parcial,tot),fmt(g.Parcial)+" recolhimentos","bl")}${kpi("Não vê a olho",pct(g["Não"]+g["Não classificado"],tot),fmt(g["Não"]+g["Não classificado"])+" recolhimentos","or")}</div>
+ <div class="card"><div class="tbl-wrap"><table><thead><tr><th>Tipo de problema</th><th class="n">Recolhim.</th><th class="n">% Classe I</th><th>A conferência vê?</th><th>Por quê</th></tr></thead><tbody>${t.sort((x,y)=>y.n-x.n).map(x=>`<tr><td>${x.c}</td><td class="n">${fmt(x.n)}</td><td class="n">${pct(x.c1,x.n)}</td><td><span class="pill ${m[x.c][0]=="Sim"?"g":m[x.c][0]=="Parcial"?"b":"o"}">${m[x.c][0]}</span></td><td>${m[x.c][1]}</td></tr>`).join("")}</tbody></table></div></div>
+ <div class="ins">Leitura: a conferência no recebimento (nota x quantidade, lote e validade, avaria e embalagem) é a última barreira, mas a maior parte dos recolhimentos nasce de problemas que não se veem a olho. Por isso a rastreabilidade por lote importa tanto quanto a inspeção visual.</div>`}
+function calc(){$("p-calc").innerHTML=`<div class="card"><h3>Calculadora de vida útil restante</h3><div class="s">Você digita os seus dados; nada é guardado nem enviado. % restante = (validade − data de referência) ÷ (validade − produção). O % mínimo é o do seu cliente (digite). Produto vencido nunca entra e nunca sai.</div>
+ <div class="calc"><div><label>Data de produção</label><input type="date" id="dp"></div><div><label>Data de validade</label><input type="date" id="dv"></div><div><label>Data de referência (dia do recebimento ou da entrega)</label><input type="date" id="dr"></div><div><label>% mínimo exigido</label><input type="number" id="pm" min="0" max="100" placeholder="ex.: o do seu cliente"></div></div><div class="res" id="res">Preencha as datas para calcular.</div></div>
+ <div class="note">Esta aba é ferramenta, não dado: nenhum cliente nem % mínimo vem da FDA. Cada cliente define o seu e se a contagem vale no recebimento ou na entrega.</div>`;
+ $("dr").valueAsDate=new Date();["dp","dv","dr","pm"].forEach(i=>$(i).addEventListener("input",cc))}
+function cc(){const p=$("dp").valueAsDate,v=$("dv").valueAsDate,r=$("dr").valueAsDate,R=$("res"),DD=864e5;if(!p||!v||!r){R.className="res";R.textContent="Preencha as datas para calcular.";return}
+ const tot=Math.round((v-p)/DD);if(tot<=0){R.className="res ven";R.textContent="A validade deve ser depois da produção.";return}
+ const rest=Math.round((v-r)/DD),pc=rest/tot*100,min=$("pm").value;let t=`Vida útil total: ${tot} dias · restam ${rest} dias · ${num(pc)}% restante. `;
+ if(rest<0){R.className="res ven";t+="VENCIDO: não entra e não sai."}else if(min===""){R.className="res";t+="Informe o % mínimo para decidir."}else{const last=new Date(p.getTime()+Math.floor((1-min/100)*tot)*DD),ok=pc>=min;R.className="res "+(ok?"ok":"no");t+=(ok?"CONFORME":"NÃO CONFORME")+` para mínimo de ${min}%. Último dia que atende: ${last.toLocaleDateString("pt-BR",{timeZone:"UTC"})}.`}R.textContent=t}
+function qual(){const A=D.auditoria.filter(x=>x.grupo!="Nulos"||+x.quantidade>0),C=D.conferencia,Rc=D.reconciliacao;
+ $("p-qual").innerHTML=`<div class="kpis k4">${kpi("Registros na base",fmt(Rc[0].recalculado_do_original),"conferido contra o total da FDA","bl")}${kpi("Duplicados reais","0","0 números repetidos; 0 linhas idênticas","gr")}${kpi("Indicadores reconciliados",Rc.filter(r=>r.bate).length+" de "+Rc.length,"recalculados do original contra a planilha","gr")}${kpi("Sem número válido","2","1 vazio e 1 'N/A' (ainda não classificados)","or")}</div>
+ <div class="grid g2"><div class="card"><h3>Auditoria do arquivo original</h3><div class="s">Cada linha é uma checagem por script (src/01_auditoria.py).</div><div class="tbl-wrap"><table><thead><tr><th>Grupo</th><th>Checagem</th><th class="n">Qtde</th><th>Decisão</th></tr></thead><tbody>${A.map(x=>`<tr><td>${x.grupo}</td><td style="white-space:normal">${x.regra}</td><td class="n">${fmt(+x.quantidade)}</td><td style="white-space:normal">${x.decisao}</td></tr>`).join("")}</tbody></table></div></div>
+ <div class="card"><h3>Conferência da planilha contra o original</h3><div class="s">Campo a campo (src/02_conferencia_planilha.py).</div><div class="tbl-wrap"><table><thead><tr><th>Checagem</th><th class="n">Afetados</th><th>Resultado</th></tr></thead><tbody>${C.map(x=>`<tr><td style="white-space:normal">${x.checagem}${x.nota?`<br><small style="color:var(--tx3)">${x.nota}</small>`:""}</td><td class="n">${fmt(+x.afetados)}</td><td><span class="pill ${x.resultado=="OK"?"g":x.resultado=="EXPLICADO"?"b":"o"}">${x.resultado}</span></td></tr>`).join("")}</tbody></table></div></div></div>
+ <div class="card"><h3>Limitações e o que foi encontrado</h3><ul class="list"><li><b>Dados dos EUA, só alimentos.</b> Não representam o Brasil nem uma operação específica.</li><li><b>Sem clientes, custos ou dados da doca:</b> a FDA não publica; por isso não há indicador de acurácia, OTIF ou custo.</li><li><b>Zeros à esquerda perdidos em códigos de lote</b> na planilha (111 linhas, mais 12 com outros ajustes de formato) e <b>38 quantidades em texto deformadas</b>. Este dashboard não usa esses campos.</li><li><b>Quantidade repetida por evento:</b> a FDA repete o total do evento em cada recolhimento (11.170 linhas). Somar volumes infla o total, então este painel não soma volumes.</li><li><b>Categoria do motivo é por palavras-chave:</b> cerca de 34 recolhimentos por Salmonella em pasta de amendoim caíram em "Alergênico"; cerca de 179 em "Rotulagem" citam alérgeno não declarado. Mantidos como a regra documentada manda.</li><li><b>Números oficiais com erro de digitação na FDA:</b> 46 números de recolhimento fora do padrão e 1 data de início impossível (F-0880-2013). Marcados, não corrigidos.</li><li><b>Mesmo produto e lote no mesmo evento:</b> 163 linhas com número diferente. São registros separados da FDA, mantidos.</li><li><b>Status:</b> a FDA não atualiza o status depois de classificar.</li></ul></div>`}
+const RND={geral,perg,prob,tempo,lote,emp,barr,calc,qual};let atual="geral";
+$("tabs").innerHTML=ABAS.map(a=>`<button class="tab" role="tab" data-k="${a[0]}">${a[1]}</button>`).join("");
+$("tabs").onclick=e=>{const k=e.target.dataset.k;if(k)abrirAba(k)};
+window.abrirAba=k=>{atual=k;ABAS.forEach(a=>{$("p-"+a[0]).classList.toggle("on",a[0]==k)});document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.k==k));render();scrollTo({top:0})};
+function render(){const ch=[];if(F.a!=="")ch.push("ano <b>"+D.anos[F.a]+"</b>");if(F.c!=="")ch.push("<b>"+(D.classes[F.c]=="Não classificado"?"não classificado":"Classe "+D.classes[F.c])+"</b>");if(F.t!=="")ch.push("<b>"+D.cats[F.t]+"</b>");if(F.x!=="")ch.push("<b>"+D.acoes[F.x]+"</b>");$("chip").className="chip-f"+(ch.length?" on":"");$("chip").innerHTML="Filtro ativo: "+ch.join(" · ")+" — "+fmt(agg().n)+" recolhimentos";
+ if(atual!="calc"||!$("dp"))RND[atual]();movimento($("p-"+atual))}
+window.addEventListener("scroll",()=>{$("progresso").style.width=(scrollY/Math.max(1,document.body.scrollHeight-innerHeight)*100)+"%"});
+abrirAba("geral");
+</script>
+</body></html>
