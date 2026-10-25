@@ -1,0 +1,16 @@
+﻿checagem;afetados;percentual;resultado;nota
+Linhas na planilha diferentes de linhas na FDA;0;0.00%;OK;
+Conjunto de event_id diferente entre FDA e planilha;0;0.00%;OK;
+Registro da planilha sem par na FDA (por event_id+produto+nº);2;0.01%;EXPLICADO;Apóstrofo inicial do nome do produto foi removido pela planilha (2 casos).
+Registros com chave repetida na FDA (pares ambíguos);0;0.00%;OK;"Conferidos contra o primeiro; ver nota 52 grupos"
+Campo codigo_lote: valor diferente do original;123;0.42%;ERRO NA PLANILHA;"Zeros à esquerda perdidos (111) e outros ajustes de formato; texto original está no arquivo da FDA."
+Campo data_inicio: valor diferente do original;1;0.00%;EXPLICADO;Data impossível 02121207 (F-0880-2013) ficou vazia na planilha, como documentado.
+Campo motivo: valor diferente do original;1;0.00%;ERRO NA PLANILHA;Apóstrofo inicial removido (1 caso).
+Campo quantidade_texto: valor diferente do original;38;0.13%;ERRO NA PLANILHA;Números em texto lidos como número (ex.: 328.0000 virou 3.280.000). Não afeta quantidade_valor.
+dias_ate_classificar não bate com datas;0;0.00%;OK;
+dias_ate_terminar não bate com datas;0;0.00%;OK;
+ano_inicio não bate com data_inicio;1;0.00%;EXPLICADO;Mesmo registro da data impossível: sem data, sem ano.
+Categorias de motivo somam diferente do total;0;0.00%;OK;
+categoria_motivo vazia;0;0.00%;OK;
+empresa_padrao vazia;0;0.00%;OK;
+recall_number repetido na planilha;0;0.00%;OK;

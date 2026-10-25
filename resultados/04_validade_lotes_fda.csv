@@ -1,0 +1,16 @@
+bloco;item;valor_1;valor_2;valor_3
+resumo;recolhimentos_com_validade_clara;2539;;
+resumo;ja_vencidos_no_inicio;172;;
+resumo;mediana_dias_restantes;137;;
+faixa;ja_vencido;172;;
+faixa;0_a_30_dias;677;;
+faixa;31_a_90_dias;259;;
+faixa;91_a_180_dias;330;;
+faixa;mais_de_180_dias;1101;;
+tipo;Contaminação microbiológica;884;102;100
+tipo;Alergênico não declarado;862;39;143
+tipo;Corpo estranho;341;7;167
+tipo;Rotulagem / embalagem;191;14;160
+tipo;Químico / substância indevida;122;5;188
+tipo;Processo / higiene / deterioração;61;4;103
+tipo;Outros;78;1;235
