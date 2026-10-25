@@ -1,0 +1,4 @@
+dados_brutos_local/
+dashboard/_shot_*.png
+__pycache__/
+*.pyc
