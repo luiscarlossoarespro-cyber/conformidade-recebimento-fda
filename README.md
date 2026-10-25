@@ -6,6 +6,10 @@ Estudo de dados públicos sobre recolhimentos de alimentos nos EUA (FDA) para re
 
 **Dashboard:** https://luiscarlossoarespro-cyber.github.io/conformidade-recebimento-fda/dashboard/
 
+**Vídeo de demonstração (2 min 40 s):**
+
+https://github.com/user-attachments/assets/adf70707-9097-4411-8309-292b25377042
+
 ## Pergunta principal
 Que tipos de problema levam a recolhimentos, quão graves são, quanto tempo levam e o que a conferência (nota, lote, validade, embalagem) consegue perceber?
 
